@@ -75,6 +75,7 @@ export function DataProvider({ children }) {
       return group.memberIds.map((id) => state.users.find((u) => u.id === id)).filter(Boolean);
     },
     createCourse: (course) => mutate("createCourse", course),
+    deleteCourse: (courseId) => mutate("deleteCourse", { courseId }),
     enrollCourse: (courseId) => mutate("enrollCourse", { courseId }),
     createGroup: ({ courseId, name }) => mutate("createGroup", { courseId, name }).then((r) => r.group),
     joinGroup: ({ groupId }) => mutate("joinGroup", { groupId }),

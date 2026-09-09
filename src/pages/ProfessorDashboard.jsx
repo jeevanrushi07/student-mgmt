@@ -9,11 +9,20 @@ import { useToast } from "../context/ToastContext";
 
 export default function ProfessorDashboard() {
   const { user } = useAuth();
-  const { coursesForProfessor, assignmentsForCourse, createCourse } = useData();
+  const { coursesForProfessor, assignmentsForCourse, createCourse, deleteCourse } = useData();
   const { notify } = useToast();
   const [courseModalOpen, setCourseModalOpen] = useState(false);
 
   const courses = coursesForProfessor(user.id);
+
+  const handleDeleteCourse = async (courseId) => {
+    const course = courses.find((item) => item.id === courseId);
+    if (!course) return;
+    if (!window.confirm(`Delete "${course.name}" and all of its assignments? This cannot be undone.`)) return;
+
+    await deleteCourse(courseId);
+    notify("Course deleted.", "default");
+  };
 
   return (
     <div className="min-h-screen paper-texture">
@@ -43,6 +52,7 @@ export default function ProfessorDashboard() {
                   key={course.id}
                   course={course}
                   stat={`${count} assignment${count !== 1 ? "s" : ""}`}
+                  onDelete={() => handleDeleteCourse(course.id)}
                 />
               );
             })}

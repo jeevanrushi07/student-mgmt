@@ -103,6 +103,20 @@ export default async function handler(req, res) {
       state.courses.push(course); await saveState(state); return json(res, 201, { course });
     }
 
+    if (action === 'deleteCourse') {
+      if (auth.role !== 'professor') return json(res, 403, { error: 'Only professors can delete courses.' });
+      const { courseId } = req.body || {};
+      const course = state.courses.find((c) => c.id === courseId);
+      if (!course || course.professorId !== auth.sub) return json(res, 403, { error: 'You do not own this course.' });
+      const assignmentIds = state.assignments.filter((a) => a.courseId === courseId).map((a) => a.id);
+      state.courses = state.courses.filter((c) => c.id !== courseId);
+      state.groups = state.groups.filter((g) => g.courseId !== courseId);
+      state.assignments = state.assignments.filter((a) => a.courseId !== courseId);
+      state.acknowledgments = state.acknowledgments.filter((ack) => !assignmentIds.includes(ack.assignmentId));
+      await saveState(state);
+      return json(res, 200, { ok: true });
+    }
+
     if (action === 'enrollCourse') {
       if (auth.role !== 'student') return json(res, 403, { error: 'Only students can enroll.' });
       const course = state.courses.find((c) => c.id === req.body?.courseId);
