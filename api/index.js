@@ -29,9 +29,13 @@ async function redis(command, ...args) {
 }
 
 const base64url = (value) => Buffer.from(value).toString('base64url');
-function signToken(user) {
+function signToken(user, state = { groups: [] }) {
+  const memberships = (state.groups || [])
+    .filter((group) => group.memberIds.includes(user.id))
+    .map((group) => ({ groupId: group.id, courseId: group.courseId, isLeader: group.leaderId === user.id }));
+
   const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = base64url(JSON.stringify({ sub: user.id, role: user.role, name: user.name, email: user.email, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 }));
+  const payload = base64url(JSON.stringify({ sub: user.id, role: user.role, name: user.name, email: user.email, groupMemberships: memberships, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 }));
   const signature = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${payload}`).digest('base64url');
   return `${header}.${payload}.${signature}`;
 }
@@ -72,7 +76,7 @@ export default async function handler(req, res) {
       const user = state.users.find((u) => u.email.toLowerCase() === String(email || '').toLowerCase() && verifyPassword(password || '', u.password));
       if (!user) return json(res, 401, { error: "Those credentials don't match our records." });
       const { password: _, ...safeUser } = user;
-      return json(res, 200, { user: safeUser, token: signToken(safeUser) });
+      return json(res, 200, { user: safeUser, token: signToken(safeUser, state) });
     }
 
     if (action === 'register') {
@@ -84,7 +88,7 @@ export default async function handler(req, res) {
       state.users.push(user);
       await saveState(state);
       const { password: _, ...safeUser } = user;
-      return json(res, 201, { user: safeUser, token: signToken(safeUser) });
+      return json(res, 201, { user: safeUser, token: signToken(safeUser, state) });
     }
 
     if (action === 'bootstrap') {

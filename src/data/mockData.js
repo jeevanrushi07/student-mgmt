@@ -93,7 +93,7 @@ export const seedAssignments = [
     title: "Assignment 1 — Balanced Trees",
     description: "Implement an AVL tree with insert, delete, and rebalance operations. Submit a short write-up on rotation cases.",
     deadline: inDays(4, 23, 59),
-    oneDriveLink: "https://onedrive.live.com/redir?assignment=avl-trees",
+    oneDriveLink: "https://onedrive.live.com/?assignment=avl-trees",
     submissionType: "individual",
   },
   {
