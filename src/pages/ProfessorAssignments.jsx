@@ -14,6 +14,7 @@ export default function ProfessorAssignments() {
   const { user } = useAuth();
   const {
     courses,
+    users,
     assignmentsForCourse,
     groupsForCourse,
     acknowledgmentsForAssignment,
@@ -33,6 +34,9 @@ export default function ProfessorAssignments() {
 
   const groups = groupsForCourse(course.id);
   const assignments = assignmentsForCourse(course.id);
+  const enrolledStudents = (course.studentIds || [])
+    .map((studentId) => users.find((u) => u.id === studentId))
+    .filter(Boolean);
 
   const enriched = assignments.map((a) => {
     const acks = acknowledgmentsForAssignment(a.id);
@@ -104,6 +108,24 @@ export default function ProfessorAssignments() {
           >
             + New assignment
           </button>
+        </div>
+
+        <div className="mb-6 fade-up rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-brass-dark)] mb-3">Enrolled students</p>
+          {enrolledStudents.length === 0 ? (
+            <p className="text-sm text-[var(--color-ink-soft)]">No students enrolled in this course yet.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {enrolledStudents.map((student) => (
+                <span
+                  key={student.id}
+                  className="rounded-sm border border-[var(--color-line)] bg-[var(--color-paper)] px-2.5 py-1.5 text-sm text-[var(--color-ink-soft)]"
+                >
+                  {student.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 fade-up">
