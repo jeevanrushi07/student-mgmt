@@ -67,8 +67,13 @@ function publicState(state) { return { ...state, users: state.users.map(({ passw
 
 export default async function handler(req, res) {
   try {
+    const action = req.query.action || req.query.path || 'bootstrap';
+
+    if (action === 'health') {
+      return json(res, 200, { ok: true, status: 'healthy', time: new Date().toISOString() });
+    }
+
     if (!JWT_SECRET) return json(res, 500, { error: 'JWT_SECRET is not configured. Add it to Vercel Environment Variables.' });
-    const action = req.query.action || 'bootstrap';
 
     if (action === 'login') {
       const state = await loadState();
