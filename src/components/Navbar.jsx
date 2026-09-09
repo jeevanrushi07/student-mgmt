@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { decodeDemoJwt, useAuth } from "../context/AuthContext";
+import { decodeJwt, useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { user, token, logout } = useAuth();
@@ -30,7 +30,7 @@ export default function Navbar() {
   }, [jwtOpen]);
 
   const home = user?.role === "professor" ? "/professor" : "/student";
-  const claims = decodeDemoJwt(token);
+  const claims = decodeJwt(token);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper-2)]/95 backdrop-blur">
