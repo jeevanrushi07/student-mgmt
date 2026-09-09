@@ -87,10 +87,13 @@ export default async function handler(req, res) {
       return json(res, 201, { user: safeUser, token: signToken(safeUser) });
     }
 
+    if (action === 'bootstrap') {
+      const state = await loadState();
+      return json(res, 200, publicState(state));
+    }
+
     const auth = verifyToken(req);
     const state = await loadState();
-
-    if (action === 'bootstrap') return json(res, 200, publicState(state));
 
     if (action === 'createCourse') {
       if (auth.role !== 'professor') return json(res, 403, { error: 'Only professors can create courses.' });
